@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Video → QR · GitHub Uploader</title>
+<title>ลิงก์ → QR โค้ด</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
   :root{
@@ -15,473 +15,180 @@
     --paper-dim:#B9B4A8;
     --amber:#FFB454;
     --teal:#4FD1C5;
-    --red:#FF6B6B;
     --line:rgba(237,233,224,0.12);
   }
   *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
   body{
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
     background:
       radial-gradient(ellipse at top left, rgba(255,180,84,0.07), transparent 55%),
       radial-gradient(ellipse at bottom right, rgba(79,209,197,0.06), transparent 55%),
       var(--ink);
-    color:var(--paper);
     font-family:'Space Grotesk',sans-serif;
-    min-height:100vh;
-    padding:48px 20px 80px;
+    color:var(--paper);
   }
-  .wrap{max-width:640px;margin:0 auto;}
+  .card{
+    width:100%;
+    max-width:420px;
+    background:var(--ink-2);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:32px 28px;
+  }
   .eyebrow{
     font-family:'JetBrains Mono',monospace;
-    font-size:12px;
-    letter-spacing:0.18em;
+    font-size:11.5px;
+    letter-spacing:0.16em;
     text-transform:uppercase;
     color:var(--amber);
     display:flex;
     align-items:center;
-    gap:10px;
-    margin-bottom:14px;
+    gap:8px;
+    margin-bottom:10px;
   }
-  .eyebrow::before{
-    content:"";
-    width:7px;height:7px;
-    background:var(--amber);
-    display:inline-block;
-    border-radius:1px;
-  }
+  .eyebrow::before{content:"";width:6px;height:6px;background:var(--amber);border-radius:1px;}
   h1{
-    font-size:clamp(28px,5vw,40px);
-    line-height:1.1;
-    margin:0 0 10px;
+    font-size:26px;
+    margin:0 0 8px;
     font-weight:700;
     letter-spacing:-0.01em;
   }
-  h1 span{color:var(--paper-dim); font-weight:500;}
-  .sub{
+  p.sub{
     color:var(--paper-dim);
-    font-size:15px;
+    font-size:14px;
     line-height:1.6;
-    max-width:52ch;
-    margin:0 0 36px;
-  }
-  .card{
-    background:var(--ink-2);
-    border:1px solid var(--line);
-    border-radius:10px;
-    padding:26px 26px 28px;
-    margin-bottom:20px;
-  }
-  .card-title{
-    font-family:'JetBrains Mono',monospace;
-    font-size:11px;
-    text-transform:uppercase;
-    letter-spacing:0.14em;
-    color:var(--teal);
-    margin:0 0 18px;
+    margin:0 0 24px;
   }
   label{
     display:block;
-    font-size:12.5px;
-    color:var(--paper-dim);
-    margin-bottom:6px;
     font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    color:var(--paper-dim);
+    margin-bottom:7px;
   }
-  .field{margin-bottom:16px;}
-  .field:last-child{margin-bottom:0;}
-  .row{display:flex; gap:12px;}
-  .row .field{flex:1;}
-  input[type=text],input[type=password]{
+  input[type=text]{
     width:100%;
     background:#0C0F22;
     border:1px solid var(--line);
     color:var(--paper);
-    padding:11px 12px;
-    border-radius:6px;
+    padding:12px 13px;
+    border-radius:7px;
     font-family:'JetBrains Mono',monospace;
     font-size:13.5px;
     outline:none;
-    transition:border-color .15s;
+    margin-bottom:16px;
   }
-  input[type=text]:focus,input[type=password]:focus{border-color:var(--amber);}
-  .hint{
-    font-size:11.5px;
-    color:var(--paper-dim);
-    opacity:.75;
-    margin-top:6px;
-    line-height:1.5;
-  }
-  .filedrop{
-    border:1.5px dashed var(--line);
-    border-radius:8px;
-    padding:26px 16px;
-    text-align:center;
-    cursor:pointer;
-    transition:border-color .15s, background .15s;
-    position:relative;
-  }
-  .filedrop:hover, .filedrop.drag{border-color:var(--amber); background:rgba(255,180,84,0.04);}
-  .filedrop input{position:absolute; inset:0; opacity:0; cursor:pointer;}
-  .filedrop .fname{font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--teal); word-break:break-all;}
-  .filedrop .fsize{font-size:11.5px; color:var(--paper-dim); margin-top:4px;}
-  .filedrop .ftxt{font-size:13.5px; color:var(--paper-dim);}
+  input[type=text]:focus{border-color:var(--amber);}
   button{
+    width:100%;
     font-family:'Space Grotesk',sans-serif;
     font-weight:600;
-    font-size:14.5px;
-    padding:13px 22px;
-    border-radius:7px;
+    font-size:15px;
+    padding:13px;
+    border-radius:8px;
     border:none;
-    cursor:pointer;
-    width:100%;
     background:var(--amber);
     color:#1a1204;
-    transition:filter .15s, transform .1s;
+    cursor:pointer;
   }
-  button:hover:not(:disabled){filter:brightness(1.08);}
-  button:active:not(:disabled){transform:scale(0.99);}
+  button:hover{filter:brightness(1.08);}
   button:disabled{opacity:.4; cursor:not-allowed;}
-  button.ghost{
-    background:transparent;
-    border:1px solid var(--line);
-    color:var(--paper);
-  }
-  .warn{
-    font-size:12px;
-    line-height:1.6;
-    color:var(--paper-dim);
-    background:rgba(255,107,107,0.06);
-    border:1px solid rgba(255,107,107,0.25);
-    border-radius:7px;
-    padding:12px 14px;
-    margin-bottom:20px;
-  }
-  .warn b{color:var(--red);}
-
-  /* encode grid — signature element */
-  .encode-wrap{margin-top:22px; display:none;}
-  .encode-wrap.active{display:block;}
-  .encode-grid{
-    display:grid;
-    grid-template-columns:repeat(18,1fr);
-    gap:2.5px;
-    aspect-ratio:1;
-    max-width:220px;
-    margin:0 auto 16px;
-  }
-  .cell{
-    aspect-ratio:1;
-    background:rgba(237,233,224,0.05);
-    border-radius:1px;
-    transition:background .25s;
-  }
-  .cell.on{background:var(--amber);}
-  .encode-status{
+  .result{
+    display:none;
     text-align:center;
-    font-family:'JetBrains Mono',monospace;
-    font-size:12.5px;
-    color:var(--paper-dim);
+    margin-top:26px;
   }
-  .encode-status .pct{color:var(--amber); font-weight:600;}
-
-  .result{display:none;}
   .result.active{display:block;}
   #qrbox{
     background:#fff;
     padding:16px;
     border-radius:8px;
     width:fit-content;
-    margin:4px auto 18px;
+    margin:0 auto 16px;
   }
-  .link-row{
-    display:flex;
-    gap:8px;
-    background:#0C0F22;
+  .dl{
+    display:inline-block;
+    background:transparent;
     border:1px solid var(--line);
-    border-radius:6px;
-    padding:10px 12px;
-    align-items:center;
-    margin-bottom:16px;
+    color:var(--paper);
+    padding:10px 18px;
+    border-radius:7px;
+    font-size:13px;
+    cursor:pointer;
+    text-decoration:none;
   }
-  .link-row input{border:none; background:transparent; padding:0; flex:1;}
-  .copybtn{
-    width:auto;
-    padding:8px 14px;
-    font-size:12.5px;
-    background:var(--teal);
-    color:#052824;
-  }
-  .status-msg{
+  .dl:hover{border-color:var(--teal);}
+  .err{
+    color:#FF6B6B;
     font-family:'JetBrains Mono',monospace;
     font-size:12.5px;
-    margin-top:14px;
-    line-height:1.6;
+    margin-top:-6px;
+    margin-bottom:14px;
+    display:none;
   }
-  .status-msg.err{color:var(--red);}
-  .status-msg.ok{color:var(--teal);}
-  footer{
-    text-align:center;
-    color:var(--paper-dim);
-    font-size:11.5px;
-    margin-top:32px;
-    font-family:'JetBrains Mono',monospace;
-    opacity:.6;
-  }
+  .err.active{display:block;}
 </style>
 </head>
 <body>
-<div class="wrap">
-
-  <div class="eyebrow">github contents api</div>
-  <h1>วิดีโอ <span>→</span> QR</h1>
-  <p class="sub">อัปโหลดไฟล์วิดีโอเข้า GitHub repo โดยตรงจากเบราว์เซอร์ แล้วสร้าง QR โค้ดที่ชี้ไปยังลิงก์ไฟล์นั้น ทุกอย่างทำงานฝั่ง client — ไม่มีเซิร์ฟเวอร์กลาง</p>
-
-  <div class="warn">
-    <b>Token จะถูกส่งตรงไปยัง GitHub เท่านั้น</b> ไม่ผ่านเซิร์ฟเวอร์อื่นใด แนะนำให้สร้าง Fine-grained Personal Access Token ที่จำกัดสิทธิ์เฉพาะ repo นี้ และให้สิทธิ์แค่ <b>Contents: Read and write</b> แล้วลบทิ้งหลังใช้งานเสร็จ
-  </div>
-
   <div class="card">
-    <p class="card-title">01 · repository</p>
-    <div class="field">
-      <label>Personal Access Token</label>
-      <input type="password" id="token" placeholder="github_pat_xxxxxxxxxxxx">
+    <div class="eyebrow">link to qr</div>
+    <h1>วางลิงก์ → ได้ QR</h1>
+    <p class="sub">วางลิงก์วิดีโอ (หรือลิงก์อะไรก็ได้) แล้วกดสร้าง QR โค้ดเพื่อนำไปใช้งานหรือแชร์ต่อ</p>
+
+    <label>ลิงก์</label>
+    <input type="text" id="urlInput" placeholder="https://raw.githubusercontent.com/...">
+    <div class="err" id="errMsg">ใส่ลิงก์ที่ขึ้นต้นด้วย http:// หรือ https://</div>
+
+    <button id="genBtn">สร้าง QR</button>
+
+    <div class="result" id="result">
+      <div id="qrbox"></div>
+      <a class="dl" id="dlBtn">ดาวน์โหลด QR</a>
     </div>
-    <div class="row">
-      <div class="field">
-        <label>Owner</label>
-        <input type="text" id="owner" placeholder="your-username">
-      </div>
-      <div class="field">
-        <label>Repository</label>
-        <input type="text" id="repo" placeholder="video-store">
-      </div>
-    </div>
-    <div class="row">
-      <div class="field">
-        <label>Branch</label>
-        <input type="text" id="branch" value="main">
-      </div>
-      <div class="field">
-        <label>Folder path</label>
-        <input type="text" id="folder" value="videos">
-      </div>
-    </div>
-    <p class="hint">Repo ต้องเป็น <b>public</b> ไม่งั้นลิงก์ raw จะเปิดดูไม่ได้ถ้าไม่ล็อกอิน (private repo ใช้ได้เฉพาะคนที่มีสิทธิ์เข้าถึง)</p>
   </div>
-
-  <div class="card">
-    <p class="card-title">02 · ไฟล์วิดีโอ</p>
-    <div class="filedrop" id="dropzone">
-      <input type="file" id="fileInput" accept="video/*">
-      <div id="dropContent">
-        <div class="ftxt">แตะเพื่อเลือกไฟล์ หรือลากมาวางที่นี่</div>
-      </div>
-    </div>
-    <p class="hint" id="sizeHint">แนะนำไฟล์ไม่เกิน ~25MB สำหรับความเสถียรของเบราว์เซอร์ (GitHub API จำกัดไฟล์เดี่ยวไว้ที่ 100MB)</p>
-  </div>
-
-  <button id="uploadBtn" disabled>อัปโหลดและสร้าง QR</button>
-
-  <div class="encode-wrap" id="encodeWrap">
-    <div class="encode-grid" id="encodeGrid"></div>
-    <div class="encode-status"><span class="pct" id="pct">0%</span> · <span id="stage">กำลังเข้ารหัสไฟล์…</span></div>
-  </div>
-
-  <div class="card result" id="resultCard">
-    <p class="card-title">03 · เสร็จแล้ว</p>
-    <div id="qrbox"></div>
-    <div class="link-row">
-      <input type="text" id="linkOut" readonly>
-      <button class="copybtn" id="copyBtn">คัดลอก</button>
-    </div>
-    <button class="ghost" id="downloadQr">ดาวน์โหลด QR เป็นรูปภาพ</button>
-  </div>
-
-  <div class="status-msg" id="statusMsg"></div>
-
-  <footer>runs entirely in your browser · github contents api</footer>
-</div>
 
 <script>
-const dropzone = document.getElementById('dropzone');
-const fileInput = document.getElementById('fileInput');
-const dropContent = document.getElementById('dropContent');
-const uploadBtn = document.getElementById('uploadBtn');
-const sizeHint = document.getElementById('sizeHint');
-const statusMsg = document.getElementById('statusMsg');
-const encodeWrap = document.getElementById('encodeWrap');
-const encodeGrid = document.getElementById('encodeGrid');
-const pctEl = document.getElementById('pct');
-const stageEl = document.getElementById('stage');
-const resultCard = document.getElementById('resultCard');
+const urlInput = document.getElementById('urlInput');
+const genBtn = document.getElementById('genBtn');
+const result = document.getElementById('result');
 const qrbox = document.getElementById('qrbox');
-const linkOut = document.getElementById('linkOut');
+const errMsg = document.getElementById('errMsg');
+const dlBtn = document.getElementById('dlBtn');
 
-let selectedFile = null;
-
-// build the 18x18 signature grid
-const CELLS = 18*18;
-for(let i=0;i<CELLS;i++){
-  const d = document.createElement('div');
-  d.className = 'cell';
-  encodeGrid.appendChild(d);
-}
-const cellEls = [...encodeGrid.children];
-// shuffle order so fill-in looks organic, not left-to-right
-const fillOrder = [...Array(CELLS).keys()].sort(()=>Math.random()-0.5);
-
-function setProgress(pct, stage){
-  pctEl.textContent = Math.round(pct) + '%';
-  if(stage) stageEl.textContent = stage;
-  const onCount = Math.round((pct/100) * CELLS);
-  cellEls.forEach(c => c.classList.remove('on'));
-  for(let i=0;i<onCount;i++){
-    cellEls[fillOrder[i]].classList.add('on');
-  }
-}
-
-dropzone.addEventListener('click', e => { if(e.target !== fileInput) fileInput.click(); });
-['dragover','dragenter'].forEach(ev => dropzone.addEventListener(ev, e=>{e.preventDefault(); dropzone.classList.add('drag');}));
-['dragleave','drop'].forEach(ev => dropzone.addEventListener(ev, e=>{e.preventDefault(); dropzone.classList.remove('drag');}));
-dropzone.addEventListener('drop', e=>{
-  if(e.dataTransfer.files.length){
-    fileInput.files = e.dataTransfer.files;
-    handleFile(e.dataTransfer.files[0]);
-  }
-});
-fileInput.addEventListener('change', e=>{
-  if(e.target.files.length) handleFile(e.target.files[0]);
-});
-
-function handleFile(file){
-  selectedFile = file;
-  const mb = (file.size / (1024*1024)).toFixed(1);
-  dropContent.innerHTML = `<div class="fname">${escapeHtml(file.name)}</div><div class="fsize">${mb} MB</div>`;
-  uploadBtn.disabled = false;
-  if(file.size > 90*1024*1024){
-    sizeHint.innerHTML = `<b style="color:var(--red)">ไฟล์นี้ ${mb}MB ใกล้ขีดจำกัด 100MB ของ GitHub API — อาจอัปโหลดไม่สำเร็จ</b>`;
-  } else if(file.size > 25*1024*1024){
-    sizeHint.innerHTML = `ไฟล์ ${mb}MB — ใหญ่กว่าที่แนะนำ อาจใช้เวลานานและเปลืองหน่วยความจำเบราว์เซอร์`;
-  } else {
-    sizeHint.textContent = `ไฟล์ ${mb}MB — ขนาดเหมาะสม`;
-  }
-}
-
-function escapeHtml(s){
-  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-
-function showStatus(msg, type){
-  statusMsg.textContent = msg;
-  statusMsg.className = 'status-msg' + (type ? ' '+type : '');
-}
-
-function arrayBufferToBase64(buffer){
-  let binary = '';
-  const bytes = new Uint8Array(buffer);
-  const chunk = 0x8000;
-  for(let i=0;i<bytes.length;i+=chunk){
-    binary += String.fromCharCode.apply(null, bytes.subarray(i, i+chunk));
-  }
-  return btoa(binary);
-}
-
-uploadBtn.addEventListener('click', async () => {
-  const token = document.getElementById('token').value.trim();
-  const owner = document.getElementById('owner').value.trim();
-  const repo = document.getElementById('repo').value.trim();
-  const branch = document.getElementById('branch').value.trim() || 'main';
-  let folder = document.getElementById('folder').value.trim();
-  folder = folder.replace(/^\/+|\/+$/g, '');
-
-  showStatus('','');
-  if(!token || !owner || !repo || !selectedFile){
-    showStatus('กรอกข้อมูล token, owner, repo และเลือกไฟล์ให้ครบก่อน', 'err');
+function generate(){
+  const val = urlInput.value.trim();
+  if(!/^https?:\/\/.+/i.test(val)){
+    errMsg.classList.add('active');
+    result.classList.remove('active');
     return;
   }
-
-  uploadBtn.disabled = true;
-  resultCard.classList.remove('active');
-  encodeWrap.classList.add('active');
-  setProgress(2, 'กำลังอ่านไฟล์…');
-
-  try {
-    const buffer = await selectedFile.arrayBuffer();
-    setProgress(30, 'กำลังเข้ารหัส base64…');
-    const base64Content = arrayBufferToBase64(buffer);
-
-    const safeName = selectedFile.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-    const path = `${folder ? folder + '/' : ''}${Date.now()}-${safeName}`;
-
-    setProgress(55, 'กำลังส่งไปยัง GitHub…');
-
-    const apiUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${path.split('/').map(encodeURIComponent).join('/')}`;
-
-    const res = await fetch(apiUrl, {
-      method: 'PUT',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/vnd.github+json',
-        'X-GitHub-Api-Version': '2022-11-28'
-      },
-      body: JSON.stringify({
-        message: `Add video: ${selectedFile.name}`,
-        content: base64Content,
-        branch: branch
-      })
-    });
-
-    setProgress(90, 'กำลังยืนยันผล…');
-    const data = await res.json();
-
-    if(!res.ok){
-      throw new Error(data.message || `GitHub API error (${res.status})`);
-    }
-
-    const rawUrl = data.content && data.content.download_url;
-    if(!rawUrl) throw new Error('อัปโหลดสำเร็จ แต่ไม่พบลิงก์ไฟล์ในผลลัพธ์');
-
-    setProgress(100, 'เสร็จสิ้น');
-    await new Promise(r => setTimeout(r, 400));
-
-    qrbox.innerHTML = '';
-    new QRCode(qrbox, {
-      text: rawUrl,
-      width: 220,
-      height: 220,
-      colorDark: '#10142A',
-      colorLight: '#ffffff',
-      correctLevel: QRCode.CorrectLevel.M
-    });
-    linkOut.value = rawUrl;
-    resultCard.classList.add('active');
-    showStatus('อัปโหลดสำเร็จ — สแกน QR เพื่อเปิดวิดีโอ', 'ok');
-
-  } catch(err){
-    showStatus('เกิดข้อผิดพลาด: ' + err.message, 'err');
-  } finally {
-    uploadBtn.disabled = false;
-    setTimeout(()=> encodeWrap.classList.remove('active'), 600);
-  }
-});
-
-document.getElementById('copyBtn').addEventListener('click', () => {
-  linkOut.select();
-  navigator.clipboard.writeText(linkOut.value).then(()=>{
-    const btn = document.getElementById('copyBtn');
-    const orig = btn.textContent;
-    btn.textContent = 'คัดลอกแล้ว';
-    setTimeout(()=> btn.textContent = orig, 1200);
+  errMsg.classList.remove('active');
+  qrbox.innerHTML = '';
+  new QRCode(qrbox, {
+    text: val,
+    width: 240,
+    height: 240,
+    colorDark: '#10142A',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.M
   });
-});
+  result.classList.add('active');
+  setTimeout(()=>{
+    const canvas = qrbox.querySelector('canvas');
+    if(canvas){
+      dlBtn.href = canvas.toDataURL('image/png');
+      dlBtn.download = 'qr-code.png';
+    }
+  }, 50);
+}
 
-document.getElementById('downloadQr').addEventListener('click', () => {
-  const canvas = qrbox.querySelector('canvas');
-  if(!canvas) return;
-  const link = document.createElement('a');
-  link.download = 'video-qr.png';
-  link.href = canvas.toDataURL('image/png');
-  link.click();
-});
+genBtn.addEventListener('click', generate);
+urlInput.addEventListener('keydown', e => { if(e.key === 'Enter') generate(); });
 </script>
 </body>
 </html>
