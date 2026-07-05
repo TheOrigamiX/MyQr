@@ -3,192 +3,343 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ลิงก์ → QR โค้ด</title>
+<title>ใบเสร็จ QR สแกน</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
   :root{
-    --ink:#10142A;
-    --ink-2:#161B36;
-    --paper:#EDE9E0;
-    --paper-dim:#B9B4A8;
-    --amber:#FFB454;
-    --teal:#4FD1C5;
-    --line:rgba(237,233,224,0.12);
+    --sky:#BFE0F2;
+    --sky-2:#9DCDE9;
+    --wood:#6B4A3A;
+    --navy:#1F3A52;
+    --paper-dim:#5b6b78;
   }
   *{box-sizing:border-box;}
+  html,body{height:100%;}
   body{
     margin:0;
     min-height:100vh;
     display:flex;
+    flex-direction:column;
     align-items:center;
-    justify-content:center;
-    padding:24px;
+    padding:32px 16px 60px;
     background:
-      radial-gradient(ellipse at top left, rgba(255,180,84,0.07), transparent 55%),
-      radial-gradient(ellipse at bottom right, rgba(79,209,197,0.06), transparent 55%),
-      var(--ink);
+      repeating-linear-gradient(90deg, var(--wood) 0 34px, transparent 34px 130px),
+      linear-gradient(180deg, var(--sky) 0%, var(--sky-2) 100%);
     font-family:'Space Grotesk',sans-serif;
-    color:var(--paper);
+    color:var(--navy);
+    position:relative;
   }
-  .card{
+
+  #bgVideo{
+    position:fixed;
+    inset:0;
     width:100%;
-    max-width:420px;
-    background:var(--ink-2);
-    border:1px solid var(--line);
+    height:100%;
+    object-fit:cover;
+    z-index:-2;
+    display:none;
+  }
+  #bgOverlay{
+    position:fixed;
+    inset:0;
+    background:rgba(10,20,30,0.35);
+    z-index:-1;
+    display:none;
+  }
+  #bgVideo.active,#bgOverlay.active{display:block;}
+
+  .sound-toggle{
+    position:fixed;
+    top:16px;
+    right:16px;
+    z-index:5;
+    background:rgba(0,0,0,0.5);
+    color:#fff;
+    border:1px solid rgba(255,255,255,0.4);
+    border-radius:20px;
+    padding:8px 16px;
+    font-size:13px;
+    font-family:'Space Grotesk',sans-serif;
+    cursor:pointer;
+    display:none;
+  }
+  .sound-toggle.active{display:block;}
+
+  .panel{
+    width:100%;
+    max-width:380px;
+    background:rgba(255,255,255,0.92);
     border-radius:12px;
-    padding:32px 28px;
+    padding:22px 22px 24px;
+    margin-bottom:28px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.12);
   }
-  .eyebrow{
-    font-family:'JetBrains Mono',monospace;
-    font-size:11.5px;
-    letter-spacing:0.16em;
-    text-transform:uppercase;
-    color:var(--amber);
-    display:flex;
-    align-items:center;
-    gap:8px;
-    margin-bottom:10px;
-  }
-  .eyebrow::before{content:"";width:6px;height:6px;background:var(--amber);border-radius:1px;}
-  h1{
-    font-size:26px;
-    margin:0 0 8px;
-    font-weight:700;
-    letter-spacing:-0.01em;
-  }
-  p.sub{
-    color:var(--paper-dim);
-    font-size:14px;
-    line-height:1.6;
-    margin:0 0 24px;
-  }
-  label{
+  .panel label{
     display:block;
     font-family:'JetBrains Mono',monospace;
-    font-size:12px;
+    font-size:11.5px;
     color:var(--paper-dim);
-    margin-bottom:7px;
+    margin-bottom:6px;
   }
-  input[type=text]{
+  .panel input[type=text]{
     width:100%;
-    background:#0C0F22;
-    border:1px solid var(--line);
-    color:var(--paper);
-    padding:12px 13px;
+    background:#fff;
+    border:1px solid #cfd8de;
+    color:var(--navy);
+    padding:11px 12px;
     border-radius:7px;
     font-family:'JetBrains Mono',monospace;
-    font-size:13.5px;
+    font-size:13px;
     outline:none;
-    margin-bottom:16px;
+    margin-bottom:14px;
   }
-  input[type=text]:focus{border-color:var(--amber);}
-  button{
+  .panel input[type=text]:focus{border-color:var(--navy);}
+  .panel button{
     width:100%;
     font-family:'Space Grotesk',sans-serif;
-    font-weight:600;
-    font-size:15px;
-    padding:13px;
+    font-weight:700;
+    font-size:14.5px;
+    padding:12px;
     border-radius:8px;
     border:none;
-    background:var(--amber);
-    color:#1a1204;
+    background:var(--navy);
+    color:#fff;
     cursor:pointer;
   }
-  button:hover{filter:brightness(1.08);}
-  button:disabled{opacity:.4; cursor:not-allowed;}
-  .result{
-    display:none;
-    text-align:center;
-    margin-top:26px;
-  }
-  .result.active{display:block;}
-  #qrbox{
-    background:#fff;
-    padding:16px;
-    border-radius:8px;
-    width:fit-content;
-    margin:0 auto 16px;
-  }
-  .dl{
-    display:inline-block;
-    background:transparent;
-    border:1px solid var(--line);
-    color:var(--paper);
-    padding:10px 18px;
-    border-radius:7px;
-    font-size:13px;
-    cursor:pointer;
-    text-decoration:none;
-  }
-  .dl:hover{border-color:var(--teal);}
+  .panel button:hover{filter:brightness(1.15);}
   .err{
-    color:#FF6B6B;
+    color:#c0392b;
     font-family:'JetBrains Mono',monospace;
-    font-size:12.5px;
-    margin-top:-6px;
-    margin-bottom:14px;
+    font-size:12px;
+    margin:-8px 0 12px;
     display:none;
   }
   .err.active{display:block;}
+
+  /* --- receipt --- */
+  .machine-slot{
+    width:90%;
+    max-width:340px;
+    height:26px;
+    background:linear-gradient(180deg,#e4e4e4,#b9b9b9);
+    border-radius:6px 6px 0 0;
+    box-shadow:inset 0 -4px 6px rgba(0,0,0,0.25);
+    position:relative;
+    display:none;
+  }
+  .machine-slot::after{
+    content:"";
+    position:absolute;
+    left:8%; right:8%; top:60%;
+    height:5px;
+    background:#222;
+    border-radius:3px;
+  }
+  .machine-slot.active{display:block;}
+
+  #receiptWrap{display:none;}
+  #receiptWrap.active{display:flex; flex-direction:column; align-items:center;}
+
+  .receipt{
+    width:100%;
+    max-width:320px;
+    background:#fdfdfb;
+    padding:26px 26px 34px;
+    position:relative;
+    box-shadow:0 10px 30px rgba(0,0,0,0.18);
+    clip-path: polygon(
+      0% 0%, 100% 0%,
+      100% 97%, 95% 100%, 90% 97%, 85% 100%, 80% 97%, 75% 100%,
+      70% 97%, 65% 100%, 60% 97%, 55% 100%, 50% 97%, 45% 100%,
+      40% 97%, 35% 100%, 30% 97%, 25% 100%, 20% 97%, 15% 100%,
+      10% 97%, 5% 100%, 0% 97%
+    );
+  }
+  .dash{
+    border-top:2px dotted #333;
+    margin:0 0 22px;
+  }
+  .dash.bottom{margin:26px 0 20px;}
+  .receipt h2{
+    font-family:'Playfair Display',serif;
+    font-size:26px;
+    font-weight:700;
+    text-align:center;
+    letter-spacing:0.03em;
+    margin:0 0 22px;
+    color:var(--navy);
+  }
+  #qrbox{
+    width:fit-content;
+    margin:0 auto;
+  }
+  .barcode{
+    height:34px;
+    margin-top:4px;
+    background-image: repeating-linear-gradient(90deg,
+      #222 0px, #222 2px,
+      transparent 2px 3px,
+      #222 3px 5px,
+      transparent 5px 7px,
+      #222 7px 8px,
+      transparent 8px 11px,
+      #222 11px 13px,
+      transparent 13px 15px
+    );
+  }
+
+  .actions{
+    margin-top:22px;
+    display:flex;
+    gap:10px;
+    width:100%;
+    max-width:320px;
+  }
+  .actions button{
+    flex:1;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:13px;
+    padding:11px;
+    border-radius:8px;
+    border:1px solid rgba(31,58,82,0.3);
+    background:rgba(255,255,255,0.85);
+    color:var(--navy);
+    cursor:pointer;
+  }
+  .actions button:hover{background:#fff;}
 </style>
 </head>
 <body>
-  <div class="card">
-    <div class="eyebrow">Link To QR By Nong Boat</div>
-    <h1>วางลิงก์ → QR</h1>
-    <p class="sub">วางลิงก์วิดีโอ (หรือลิงก์อะไรก็ได้) แล้วกดสร้าง QR โค้ดเพื่อนำไปใช้งานหรือแชร์ต่อนะครับ (สร้างขึ้นมาเพื่อให้น้องรวงข้าวได้ส่งงาน และผู้ที่เข้ามาใช้งานทุกท่านได้สร้าง QR เป็นของตัวเองแบบฟรีๆ)</p>
 
-    <label>ลิงก์</label>
-    <input type="text" id="urlInput" placeholder="https://...">
+  <div class="panel">
+    <label>ลิงก์วิดีโอ / URL</label>
+    <input type="text" id="urlInput" placeholder="https://raw.githubusercontent.com/...">
+    <label>ข้อความหัวใบเสร็จ</label>
+    <input type="text" id="titleInput" value="SCAN NOW">
     <div class="err" id="errMsg">ใส่ลิงก์ที่ขึ้นต้นด้วย http:// หรือ https://</div>
+    <button id="genBtn">สร้างใบเสร็จ QR</button>
+  </div>
 
-    <button id="genBtn">สร้าง QR</button>
+  <!--
+    ★★★ แก้ 2 บรรทัดนี้ในสคริปต์ด้านล่าง ให้เป็น raw link จริงจาก GitHub ★★★
+    ตอนนี้ใส่ไฟล์ตัวอย่างไว้ชั่วคราว หา element ชื่อ BG_VIDEO_URL กับ BG_MUSIC_URL
+  -->
+  <video id="bgVideo" autoplay muted loop playsinline></video>
+  <div id="bgOverlay"></div>
+  <audio id="bgMusic" loop></audio>
+  <button class="sound-toggle active" id="soundToggle">🔇 เปิดเพลง</button>
 
-    <div class="result" id="result">
+  <div class="machine-slot" id="slot"></div>
+  <div id="receiptWrap">
+    <div class="receipt" id="receiptCard">
+      <div class="dash"></div>
+      <h2 id="titleOut">SCAN NOW</h2>
       <div id="qrbox"></div>
-      <a class="dl" id="dlBtn">ดาวน์โหลด QR</a>
+      <div class="dash bottom"></div>
+      <div class="barcode"></div>
     </div>
+  </div>
+
+  <div class="actions" id="actionRow" style="display:none;">
+    <button id="dlQr">ดาวน์โหลด QR</button>
+    <button id="dlReceipt">ดาวน์โหลดใบเสร็จ</button>
   </div>
 
 <script>
 const urlInput = document.getElementById('urlInput');
+const titleInput = document.getElementById('titleInput');
 const genBtn = document.getElementById('genBtn');
-const result = document.getElementById('result');
-const qrbox = document.getElementById('qrbox');
 const errMsg = document.getElementById('errMsg');
-const dlBtn = document.getElementById('dlBtn');
+const slot = document.getElementById('slot');
+const receiptWrap = document.getElementById('receiptWrap');
+const receiptCard = document.getElementById('receiptCard');
+const qrbox = document.getElementById('qrbox');
+const titleOut = document.getElementById('titleOut');
+const actionRow = document.getElementById('actionRow');
+const dlQr = document.getElementById('dlQr');
+const dlReceipt = document.getElementById('dlReceipt');
+const bgVideo = document.getElementById('bgVideo');
+const bgOverlay = document.getElementById('bgOverlay');
+const bgMusic = document.getElementById('bgMusic');
+const soundToggle = document.getElementById('soundToggle');
+
+// ★★★ แก้ 2 บรรทัดนี้เป็น raw link จริงจาก GitHub ของคุณ ★★★
+const BG_VIDEO_URL = "https://raw.githubusercontent.com/USERNAME/REPO/main/bg.mp4";
+const BG_MUSIC_URL = "https://raw.githubusercontent.com/USERNAME/REPO/main/music.mp3";
+
+// ตั้งพื้นหลังวิดีโอให้เล่นวนทันทีที่เปิดหน้าเว็บ (เงียบเสมอ ตามที่เบราว์เซอร์อนุญาต autoplay)
+bgVideo.src = BG_VIDEO_URL;
+bgVideo.classList.add('active');
+bgOverlay.classList.add('active');
+bgVideo.play().catch(()=>{});
+
+// เตรียมเพลงไว้ แต่ยังไม่เล่น เพราะเบราว์เซอร์บล็อก autoplay เสียงจนกว่าจะมีการคลิกก่อน
+bgMusic.src = BG_MUSIC_URL;
 
 function generate(){
   const val = urlInput.value.trim();
   if(!/^https?:\/\/.+/i.test(val)){
     errMsg.classList.add('active');
-    result.classList.remove('active');
+    receiptWrap.classList.remove('active');
+    slot.classList.remove('active');
+    actionRow.style.display = 'none';
     return;
   }
   errMsg.classList.remove('active');
+  titleOut.textContent = titleInput.value.trim() || 'SCAN NOW';
+
   qrbox.innerHTML = '';
   new QRCode(qrbox, {
     text: val,
-    width: 240,
-    height: 240,
-    colorDark: '#10142A',
-    colorLight: '#ffffff',
+    width: 200,
+    height: 200,
+    colorDark: '#1F3A52',
+    colorLight: '#fdfdfb',
     correctLevel: QRCode.CorrectLevel.M
   });
-  result.classList.add('active');
-  setTimeout(()=>{
-    const canvas = qrbox.querySelector('canvas');
-    if(canvas){
-      dlBtn.href = canvas.toDataURL('image/png');
-      dlBtn.download = 'qr-code.png';
-    }
-  }, 50);
+
+  slot.classList.add('active');
+  receiptWrap.classList.add('active');
+  actionRow.style.display = 'flex';
 }
 
 genBtn.addEventListener('click', generate);
 urlInput.addEventListener('keydown', e => { if(e.key === 'Enter') generate(); });
+titleInput.addEventListener('keydown', e => { if(e.key === 'Enter') generate(); });
+
+dlQr.addEventListener('click', () => {
+  const canvas = qrbox.querySelector('canvas');
+  if(!canvas) return;
+  const a = document.createElement('a');
+  a.download = 'qr-code.png';
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+});
+
+dlReceipt.addEventListener('click', () => {
+  html2canvas(receiptCard, {backgroundColor:'#fdfdfb', scale:2}).then(canvas => {
+    const a = document.createElement('a');
+    a.download = 'receipt-qr.png';
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+  });
+});
+
+soundToggle.addEventListener('click', () => {
+  if(bgMusic.paused){
+    bgMusic.play().catch(()=>{
+      alert('เล่นเพลงไม่ได้ ตรวจสอบว่าลิงก์ BG_MUSIC_URL ในโค้ดถูกต้องหรือยัง');
+    });
+    soundToggle.textContent = '🔊 ปิดเพลง';
+  } else {
+    bgMusic.pause();
+    soundToggle.textContent = '🔇 เปิดเพลง';
+  }
+});
 </script>
 </body>
 </html>
